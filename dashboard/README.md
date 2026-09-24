@@ -1,4 +1,4 @@
-# SentinelAPI Dashboard
+# InitiatorAPI Dashboard
 
 Vite + React UI that renders `scanner/output/findings.json`.
 

@@ -1,4 +1,4 @@
-# SentinelAPI — Demo Script (≈3 minutes)
+# InitiatorAPI — Demo Script (≈3 minutes)
 
 > Ethics: only scan the local sandboxed demo API (`localhost:4000`), never production without authorization.
 
@@ -45,10 +45,10 @@ Open http://localhost:5173
 
 | ID | Issue | Severity |
 |---|---|---|
-| SEN-003 | Excessive data exposure on `/profile/me` | critical |
-| SEN-001 | IDOR on `/orders/:id` | high |
-| SEN-002 | IDOR on `/users/:id/profile` | high |
-| SEN-006 | JWT never expires | medium |
-| SEN-007 | Missing rate limiting | medium |
+| INI-003 | Excessive data exposure on `/profile/me` | critical |
+| INI-001 | IDOR on `/orders/:id` | high |
+| INI-002 | IDOR on `/users/:id/profile` | high |
+| INI-006 | JWT never expires | medium |
+| INI-007 | Missing rate limiting | medium |
 
-SEN-004 (control) and SEN-005 (auth required) should stay **secure**.
+INI-004 (control) and INI-005 (auth required) should stay **secure**.

@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "SentinelAPI Demo Store",
-    "description": "Intentionally vulnerable sandboxed API for SentinelAPI scanner demos. Do not point the scanner at production systems.",
+    "title": "InitiatorAPI Demo Store",
+    "description": "Intentionally vulnerable sandboxed API for InitiatorAPI scanner demos. Do not point the scanner at production systems.",
     "version": "1.0.0"
   },
   "servers": [

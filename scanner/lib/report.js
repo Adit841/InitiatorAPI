@@ -23,7 +23,7 @@ function sortFindings(findings) {
 function buildReport({ target, findings, openapi }) {
   const sorted = sortFindings(findings);
   return {
-    tool: "SentinelAPI Scanner",
+    tool: "InitiatorAPI Scanner",
     scannedAt: new Date().toISOString(),
     target,
     openapi: openapi || null,
@@ -40,7 +40,7 @@ function writeReport(report, outDir) {
 }
 
 function printConsole(report) {
-  console.log(`\nSentinelAPI scan → ${report.target}`);
+  console.log(`\nInitiatorAPI scan → ${report.target}`);
   console.log(`Scanned at ${report.scannedAt}`);
   console.log(
     `Summary: ${report.summary.vulnerable} vulnerable, ${report.summary.secure} secure ` +

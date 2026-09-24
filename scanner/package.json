@@ -1,5 +1,5 @@
 {
-  "name": "sentinel-scanner",
+  "name": "initiator-scanner",
   "version": "1.0.0",
   "description": "Zero-Trust API vulnerability scanner (OpenAPI + IDOR + data exposure + auth/rate checks)",
   "main": "index.js",

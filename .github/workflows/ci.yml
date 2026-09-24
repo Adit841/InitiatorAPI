@@ -1,4 +1,4 @@
-name: SentinelAPI CI
+name: InitiatorAPI CI
 
 on:
   push:

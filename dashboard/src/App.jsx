@@ -149,7 +149,7 @@ export default function App() {
     <div className="shell">
       <header className="top">
         <div className="brand-block">
-          <p className="brand">SentinelAPI</p>
+          <p className="brand">InitiatorAPI</p>
           <h1>Vulnerability findings</h1>
           <p className="sub">
             Scan of <code>{report.target}</code> · {formatTime(report.scannedAt)}

@@ -35,7 +35,7 @@ async function checkOrderIdor(baseUrl, aditya, amanOrderId) {
 
   if (res.status === 200 && res.data?.orderId === amanOrderId && res.data?.userId !== aditya.userId) {
     return finding({
-      id: "SEN-001",
+      id: "INI-001",
       title: "Broken object-level authorization on orders",
       severity: "high",
       category: "idor",
@@ -61,7 +61,7 @@ async function checkOrderIdor(baseUrl, aditya, amanOrderId) {
   }
 
   return finding({
-    id: "SEN-001",
+    id: "INI-001",
     title: "Broken object-level authorization on orders",
     severity: "info",
     category: "idor",
@@ -81,7 +81,7 @@ async function checkProfileIdor(baseUrl, aditya, amanUserId) {
 
   if (res.status === 200 && res.data?.userId === amanUserId && amanUserId !== aditya.userId) {
     return finding({
-      id: "SEN-002",
+      id: "INI-002",
       title: "Broken object-level authorization on user profiles",
       severity: "high",
       category: "idor",
@@ -107,7 +107,7 @@ async function checkProfileIdor(baseUrl, aditya, amanUserId) {
   }
 
   return finding({
-    id: "SEN-002",
+    id: "INI-002",
     title: "Broken object-level authorization on user profiles",
     severity: "info",
     category: "idor",
@@ -128,7 +128,7 @@ async function checkExcessiveDataExposure(baseUrl, aditya) {
 
   if (res.status === 200 && leaked.length > 0) {
     return finding({
-      id: "SEN-003",
+      id: "INI-003",
       title: "Excessive data exposure on current-user profile",
       severity: "critical",
       category: "excessive_data_exposure",
@@ -153,7 +153,7 @@ async function checkExcessiveDataExposure(baseUrl, aditya) {
   }
 
   return finding({
-    id: "SEN-003",
+    id: "INI-003",
     title: "Excessive data exposure on current-user profile",
     severity: "info",
     category: "excessive_data_exposure",
@@ -195,7 +195,7 @@ async function checkOrdersMineControl(baseUrl, aditya) {
 
   if (issues.length === 0) {
     return finding({
-      id: "SEN-004",
+      id: "INI-004",
       title: "Ownership check on /orders/mine (control)",
       severity: "info",
       category: "control",
@@ -219,7 +219,7 @@ async function checkOrdersMineControl(baseUrl, aditya) {
   }
 
   return finding({
-    id: "SEN-004",
+    id: "INI-004",
     title: "Ownership check on /orders/mine (control)",
     severity: "high",
     category: "control",
@@ -237,7 +237,7 @@ async function checkMissingAuth(baseUrl, protectedGets) {
   const targets = (protectedGets || []).slice(0, 6);
   if (targets.length === 0) {
     return finding({
-      id: "SEN-005",
+      id: "INI-005",
       title: "Unauthenticated access to protected endpoints",
       severity: "info",
       category: "auth_misconfig",
@@ -260,7 +260,7 @@ async function checkMissingAuth(baseUrl, protectedGets) {
 
   if (open.length > 0) {
     return finding({
-      id: "SEN-005",
+      id: "INI-005",
       title: "Protected endpoints accept unauthenticated requests",
       severity: "high",
       category: "auth_misconfig",
@@ -275,7 +275,7 @@ async function checkMissingAuth(baseUrl, protectedGets) {
   }
 
   return finding({
-    id: "SEN-005",
+    id: "INI-005",
     title: "Protected endpoints reject unauthenticated requests",
     severity: "info",
     category: "auth_misconfig",
@@ -296,7 +296,7 @@ async function checkJwtExpiry(aditya) {
   const payload = decodeJwtPayload(aditya.token);
   if (payload && payload.exp === undefined) {
     return finding({
-      id: "SEN-006",
+      id: "INI-006",
       title: "JWT access tokens never expire",
       severity: "medium",
       category: "auth_misconfig",
@@ -319,7 +319,7 @@ async function checkJwtExpiry(aditya) {
   }
 
   return finding({
-    id: "SEN-006",
+    id: "INI-006",
     title: "JWT access tokens include expiry",
     severity: "info",
     category: "auth_misconfig",
@@ -354,7 +354,7 @@ async function checkRateLimiting(baseUrl, aditya, rateLimitTargets) {
   const limited = statuses.filter((s) => s === 429 || s === 503).length;
   if (limited === 0 && !sawRetryAfter) {
     return finding({
-      id: "SEN-007",
+      id: "INI-007",
       title: "Missing rate limiting on authenticated endpoint",
       severity: "medium",
       category: "rate_limiting",
@@ -379,7 +379,7 @@ async function checkRateLimiting(baseUrl, aditya, rateLimitTargets) {
   }
 
   return finding({
-    id: "SEN-007",
+    id: "INI-007",
     title: "Rate limiting observed on authenticated endpoint",
     severity: "info",
     category: "rate_limiting",

@@ -1,4 +1,4 @@
-# SentinelAPI
+# InitiatorAPI
 
 Zero-Trust API Vulnerability Scanner — hackathon MVP.
 
@@ -60,4 +60,4 @@ GitHub Actions (`.github/workflows/ci.yml`) starts the demo API, runs the scanne
 
 ## Ethics / scope
 
-Only test against this sandboxed demo API or other APIs you are **explicitly authorized** to assess. Do not point SentinelAPI at third-party production systems.
+Only test against this sandboxed demo API or other APIs you are **explicitly authorized** to assess. Do not point InitiatorAPI at third-party production systems.

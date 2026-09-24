@@ -1,5 +1,5 @@
 {
-  "name": "sentinelapi",
+  "name": "initiatorapi",
   "private": true,
   "version": "1.0.0",
   "description": "Zero-Trust API Vulnerability Scanner — sandboxed demo API, scanner, and findings dashboard",

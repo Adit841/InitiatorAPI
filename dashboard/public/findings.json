@@ -1,10 +1,10 @@
 {
-  "tool": "SentinelAPI Scanner",
+  "tool": "InitiatorAPI Scanner",
   "scannedAt": "2026-09-24T10:38:44.705Z",
   "target": "http://localhost:4000",
   "openapi": {
     "source": "http://localhost:4000/openapi.json",
-    "title": "SentinelAPI Demo Store",
+    "title": "InitiatorAPI Demo Store",
     "version": "1.0.0",
     "pathCount": 8
   },
@@ -20,7 +20,7 @@
   },
   "findings": [
     {
-      "id": "SEN-003",
+      "id": "INI-003",
       "title": "Excessive data exposure on current-user profile",
       "severity": "critical",
       "category": "excessive_data_exposure",
@@ -53,7 +53,7 @@
       "recommendation": "Return a strict DTO with only userId, name, and email (plus any intentional public fields). Never serialize passwordHash, internalNotes, or role by default."
     },
     {
-      "id": "SEN-001",
+      "id": "INI-001",
       "title": "Broken object-level authorization on orders",
       "severity": "high",
       "category": "idor",
@@ -81,7 +81,7 @@
       "recommendation": "Before returning an order, verify order.userId === authenticated userId. Return 403 or 404 when ownership fails."
     },
     {
-      "id": "SEN-002",
+      "id": "INI-002",
       "title": "Broken object-level authorization on user profiles",
       "severity": "high",
       "category": "idor",
@@ -108,7 +108,7 @@
       "recommendation": "Allow profile access only for the authenticated user, or enforce an explicit admin/peer permission model. Reject cross-user reads with 403."
     },
     {
-      "id": "SEN-006",
+      "id": "INI-006",
       "title": "JWT access tokens never expire",
       "severity": "medium",
       "category": "auth_misconfig",
@@ -132,7 +132,7 @@
       "recommendation": "Sign tokens with a short exp (and optional refresh flow). Reject expired tokens in auth middleware."
     },
     {
-      "id": "SEN-007",
+      "id": "INI-007",
       "title": "Missing rate limiting on authenticated endpoint",
       "severity": "medium",
       "category": "rate_limiting",
@@ -155,7 +155,7 @@
       "recommendation": "Add per-IP and per-user rate limits (e.g. express-rate-limit). Return 429 with Retry-After under abuse."
     },
     {
-      "id": "SEN-004",
+      "id": "INI-004",
       "title": "Ownership check on /orders/mine (control)",
       "severity": "info",
       "category": "control",
@@ -180,7 +180,7 @@
       "recommendation": "Keep this ownership filter as the pattern for other object endpoints."
     },
     {
-      "id": "SEN-005",
+      "id": "INI-005",
       "title": "Protected endpoints reject unauthenticated requests",
       "severity": "info",
       "category": "auth_misconfig",
