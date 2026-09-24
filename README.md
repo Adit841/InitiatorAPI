@@ -40,13 +40,13 @@ Password for both: `test1234`
 
 | Email | userId | Order |
 |---|---|---|
-| alice@test.com | u1 | o1 Laptop, 899 |
-| bob@test.com | u2 | o2 Phone, 499 |
+| aditya@test.com | u1 | o1 Laptop, 899 |
+| aman@test.com | u2 | o2 Phone, 499 |
 
 ## What the scanner checks
 
 1. **OpenAPI ingest** — loads `/openapi.json` (or `OPENAPI_PATH` / `OPENAPI_URL`)
-2. **IDOR / BOLA** — Alice → Bob's `GET /orders/{id}` and `GET /users/{id}/profile`
+2. **IDOR / BOLA** — Aditya → aman's `GET /orders/{id}` and `GET /users/{id}/profile`
 3. **Excessive data exposure** — `GET /profile/me` sensitive fields
 4. **Auth misconfiguration** — unauthenticated probes + JWT missing `exp`
 5. **Rate limiting** — burst traffic without 429/Retry-After

@@ -3,8 +3,8 @@ const bcrypt = require("bcryptjs");
 const users = [
   {
     userId: "u1",
-    email: "alice@test.com",
-    name: "Alice",
+    email: "aditya@test.com",
+    name: "Aditya",
     phone: "9111111111",
     passwordHash: bcrypt.hashSync("test1234", 8),
     internalNotes: "flagged for review",
@@ -12,8 +12,8 @@ const users = [
   },
   {
     userId: "u2",
-    email: "bob@test.com",
-    name: "Bob",
+    email: "aman@test.com",
+    name: "aman",
     phone: "9222222222",
     passwordHash: bcrypt.hashSync("test1234", 8),
     internalNotes: "none",

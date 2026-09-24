@@ -28,12 +28,12 @@ function decodeJwtPayload(token) {
   }
 }
 
-/** Alice requests Bob's order by ID — ownership should block this. */
-async function checkOrderIdor(baseUrl, alice, bobOrderId) {
-  const path = `/orders/${bobOrderId}`;
-  const res = await request(baseUrl, path, { token: alice.token });
+/** aditya requests aman's order by ID — ownership should block this. */
+async function checkOrderIdor(baseUrl, aditya, amanOrderId) {
+  const path = `/orders/${amanOrderId}`;
+  const res = await request(baseUrl, path, { token: aditya.token });
 
-  if (res.status === 200 && res.data?.orderId === bobOrderId && res.data?.userId !== alice.userId) {
+  if (res.status === 200 && res.data?.orderId === amanOrderId && res.data?.userId !== aditya.userId) {
     return finding({
       id: "SEN-001",
       title: "Broken object-level authorization on orders",
@@ -44,16 +44,16 @@ async function checkOrderIdor(baseUrl, alice, bobOrderId) {
       description:
         "An authenticated user can read another user's order by guessing or enumerating the order ID. The API never checks that the order belongs to the caller.",
       evidence: {
-        actor: alice.email,
-        requestedOrderId: bobOrderId,
+        actor: aditya.email,
+        requestedOrderId: amanOrderId,
         responseStatus: res.status,
         returnedUserId: res.data.userId,
         returnedFields: Object.keys(res.data),
       },
       reproduction: [
-        `POST /auth/login with { "email": "${alice.email}", "password": "<alice-password>" }`,
-        `GET ${path} with Authorization: Bearer <alice-token>`,
-        `Observe 200 and order owned by userId ${res.data.userId}, not ${alice.userId}`,
+        `POST /auth/login with { "email": "${aditya.email}", "password": "<aditya-password>" }`,
+        `GET ${path} with Authorization: Bearer <aditya-token>`,
+        `Observe 200 and order owned by userId ${res.data.userId}, not ${aditya.userId}`,
       ],
       recommendation:
         "Before returning an order, verify order.userId === authenticated userId. Return 403 or 404 when ownership fails.",
@@ -74,12 +74,12 @@ async function checkOrderIdor(baseUrl, alice, bobOrderId) {
   });
 }
 
-/** Alice requests Bob's profile by ID. */
-async function checkProfileIdor(baseUrl, alice, bobUserId) {
-  const path = `/users/${bobUserId}/profile`;
-  const res = await request(baseUrl, path, { token: alice.token });
+/** aditya requests aman's profile by ID. */
+async function checkProfileIdor(baseUrl, aditya, amanUserId) {
+  const path = `/users/${amanUserId}/profile`;
+  const res = await request(baseUrl, path, { token: aditya.token });
 
-  if (res.status === 200 && res.data?.userId === bobUserId && bobUserId !== alice.userId) {
+  if (res.status === 200 && res.data?.userId === amanUserId && amanUserId !== aditya.userId) {
     return finding({
       id: "SEN-002",
       title: "Broken object-level authorization on user profiles",
@@ -90,15 +90,15 @@ async function checkProfileIdor(baseUrl, alice, bobUserId) {
       description:
         "Any authenticated user can fetch another user's profile by ID. There is no ownership or permission check on the :id path parameter.",
       evidence: {
-        actor: alice.email,
-        requestedUserId: bobUserId,
+        actor: aditya.email,
+        requestedUserId: amanUserId,
         responseStatus: res.status,
         returnedEmail: res.data.email,
         returnedFields: Object.keys(res.data),
       },
       reproduction: [
-        `POST /auth/login as ${alice.email}`,
-        `GET ${path} with Authorization: Bearer <alice-token>`,
+        `POST /auth/login as ${aditya.email}`,
+        `GET ${path} with Authorization: Bearer <aditya-token>`,
         `Observe 200 with another user's profile (email: ${res.data.email})`,
       ],
       recommendation:
@@ -121,9 +121,9 @@ async function checkProfileIdor(baseUrl, alice, bobUserId) {
 }
 
 /** Own profile should not return password hashes or internal fields. */
-async function checkExcessiveDataExposure(baseUrl, alice) {
+async function checkExcessiveDataExposure(baseUrl, aditya) {
   const path = "/profile/me";
-  const res = await request(baseUrl, path, { token: alice.token });
+  const res = await request(baseUrl, path, { token: aditya.token });
   const leaked = SENSITIVE_FIELDS.filter((f) => res.data && Object.prototype.hasOwnProperty.call(res.data, f));
 
   if (res.status === 200 && leaked.length > 0) {
@@ -137,14 +137,14 @@ async function checkExcessiveDataExposure(baseUrl, alice) {
       description:
         "The current-user profile endpoint returns sensitive server-side fields that should never reach a client, including credential material and internal metadata.",
       evidence: {
-        actor: alice.email,
+        actor: aditya.email,
         responseStatus: res.status,
         leakedFields: leaked,
         allFields: Object.keys(res.data || {}),
       },
       reproduction: [
-        `POST /auth/login as ${alice.email}`,
-        `GET ${path} with Authorization: Bearer <alice-token>`,
+        `POST /auth/login as ${aditya.email}`,
+        `GET ${path} with Authorization: Bearer <aditya-token>`,
         `Inspect JSON for unexpected fields: ${leaked.join(", ")}`,
       ],
       recommendation:
@@ -170,9 +170,9 @@ async function checkExcessiveDataExposure(baseUrl, alice) {
  * Control case: /orders/mine must only return the caller's orders
  * with minimal safe fields. A correct scanner reports this as secure.
  */
-async function checkOrdersMineControl(baseUrl, alice) {
+async function checkOrdersMineControl(baseUrl, aditya) {
   const path = "/orders/mine";
-  const res = await request(baseUrl, path, { token: alice.token });
+  const res = await request(baseUrl, path, { token: aditya.token });
   const orders = res.data?.orders;
   const issues = [];
 
@@ -180,7 +180,7 @@ async function checkOrdersMineControl(baseUrl, alice) {
     issues.push("Unexpected response shape or status");
   } else {
     for (const order of orders) {
-      if (order.userId && order.userId !== alice.userId) {
+      if (order.userId && order.userId !== aditya.userId) {
         issues.push(`Returned order belonging to ${order.userId}`);
       }
       const keys = Object.keys(order).sort();
@@ -190,8 +190,8 @@ async function checkOrdersMineControl(baseUrl, alice) {
     }
   }
 
-  const bobOnly = Array.isArray(orders) && orders.some((o) => o.orderId === "o2");
-  if (bobOnly) issues.push("Alice's /orders/mine included Bob's order o2");
+  const amanOnly = Array.isArray(orders) && orders.some((o) => o.orderId === "o2");
+  if (amanOnly) issues.push("aditya's /orders/mine included aman's order o2");
 
   if (issues.length === 0) {
     return finding({
@@ -204,14 +204,14 @@ async function checkOrdersMineControl(baseUrl, alice) {
       description:
         "Control case passed. The endpoint filters by the authenticated user and returns only safe fields (orderId, item, amount). No vulnerability reported.",
       evidence: {
-        actor: alice.email,
+        actor: aditya.email,
         responseStatus: res.status,
         orderCount: orders.length,
         sample: orders[0] || null,
       },
       reproduction: [
-        `POST /auth/login as ${alice.email}`,
-        `GET ${path} with Authorization: Bearer <alice-token>`,
+        `POST /auth/login as ${aditya.email}`,
+        `GET ${path} with Authorization: Bearer <aditya-token>`,
         "Confirm only the caller's orders appear, with no address/userId/password fields",
       ],
       recommendation: "Keep this ownership filter as the pattern for other object endpoints.",
@@ -227,7 +227,7 @@ async function checkOrdersMineControl(baseUrl, alice) {
     endpoint: "GET /orders/mine",
     description: "Control endpoint failed ownership or field-minimization checks.",
     evidence: { issues, body: res.data },
-    reproduction: [`GET ${path} as ${alice.email} and inspect response`],
+    reproduction: [`GET ${path} as ${aditya.email} and inspect response`],
     recommendation: "Filter by req.user.userId and strip sensitive fields before responding.",
   });
 }
@@ -292,8 +292,8 @@ async function checkMissingAuth(baseUrl, protectedGets) {
 }
 
 /** JWT without exp is a weak auth configuration. */
-async function checkJwtExpiry(alice) {
-  const payload = decodeJwtPayload(alice.token);
+async function checkJwtExpiry(aditya) {
+  const payload = decodeJwtPayload(aditya.token);
   if (payload && payload.exp === undefined) {
     return finding({
       id: "SEN-006",
@@ -305,12 +305,12 @@ async function checkJwtExpiry(alice) {
       description:
         "Issued JWTs omit the exp claim, so stolen tokens remain valid indefinitely. This weakens zero-trust session controls.",
       evidence: {
-        actor: alice.email,
+        actor: aditya.email,
         claims: Object.keys(payload),
         hasExp: false,
       },
       reproduction: [
-        `POST /auth/login as ${alice.email}`,
+        `POST /auth/login as ${aditya.email}`,
         "Decode the JWT payload (base64url middle segment)",
         "Observe missing exp claim",
       ],
@@ -333,7 +333,7 @@ async function checkJwtExpiry(alice) {
 }
 
 /** Burst requests should eventually see 429 / Retry-After if rate limiting exists. */
-async function checkRateLimiting(baseUrl, alice, rateLimitTargets) {
+async function checkRateLimiting(baseUrl, aditya, rateLimitTargets) {
   const target = (rateLimitTargets && rateLimitTargets[0]) || { path: "/orders/mine", method: "GET" };
   const burst = 40;
   const statuses = [];
@@ -344,7 +344,7 @@ async function checkRateLimiting(baseUrl, alice, rateLimitTargets) {
       method: target.method || "GET",
       headers: {
         "content-type": "application/json",
-        authorization: `Bearer ${alice.token}`,
+        authorization: `Bearer ${aditya.token}`,
       },
     });
     statuses.push(res.status);
@@ -369,7 +369,7 @@ async function checkRateLimiting(baseUrl, alice, rateLimitTargets) {
         successCount: statuses.filter((s) => s >= 200 && s < 300).length,
       },
       reproduction: [
-        `POST /auth/login as ${alice.email}`,
+        `POST /auth/login as ${aditya.email}`,
         `Send ${burst} rapid ${target.method || "GET"} ${target.path} requests with the same Bearer token`,
         "Observe no 429/503 and no Retry-After header",
       ],
@@ -392,9 +392,9 @@ async function checkRateLimiting(baseUrl, alice, rateLimitTargets) {
   });
 }
 
-function resolveIdorIds(plan, bob) {
+function resolveIdorIds(plan, aman) {
   let orderId = "o2";
-  let userId = bob.userId;
+  let userId = aman.userId;
 
   for (const t of plan.idorTargets || []) {
     if (t.template.includes("/orders/")) {
@@ -410,17 +410,17 @@ function resolveIdorIds(plan, bob) {
   return { orderId, userId };
 }
 
-async function runAllChecks(baseUrl, alice, bob, plan = {}) {
-  const { orderId, userId } = resolveIdorIds(plan, bob);
+async function runAllChecks(baseUrl, aditya, aman, plan = {}) {
+  const { orderId, userId } = resolveIdorIds(plan, aman);
 
   const findings = await Promise.all([
-    checkOrderIdor(baseUrl, alice, orderId),
-    checkProfileIdor(baseUrl, alice, userId),
-    checkExcessiveDataExposure(baseUrl, alice),
-    checkOrdersMineControl(baseUrl, alice),
+    checkOrderIdor(baseUrl, aditya, orderId),
+    checkProfileIdor(baseUrl, aditya, userId),
+    checkExcessiveDataExposure(baseUrl, aditya),
+    checkOrdersMineControl(baseUrl, aditya),
     checkMissingAuth(baseUrl, plan.protectedGets),
-    checkJwtExpiry(alice),
-    checkRateLimiting(baseUrl, alice, plan.rateLimitTargets),
+    checkJwtExpiry(aditya),
+    checkRateLimiting(baseUrl, aditya, plan.rateLimitTargets),
   ]);
   return findings;
 }

@@ -10,8 +10,8 @@ const OPENAPI_PATH = process.env.OPENAPI_PATH || "";
 const OPENAPI_URL = process.env.OPENAPI_URL || "";
 
 const USERS = {
-  alice: { email: "alice@test.com", password: "test1234" },
-  bob: { email: "bob@test.com", password: "test1234" },
+  aditya: { email: "aditya@test.com", password: "test1234" },
+  aman: { email: "aman@test.com", password: "test1234" },
 };
 
 async function main() {
@@ -36,11 +36,11 @@ async function main() {
       `${plan.exposureTargets.length} exposure targets\n`
   );
 
-  const alice = await login(TARGET, USERS.alice.email, USERS.alice.password);
-  const bob = await login(TARGET, USERS.bob.email, USERS.bob.password);
-  console.log(`Authenticated as ${alice.email} (${alice.userId}) and ${bob.email} (${bob.userId})`);
+  const aditya = await login(TARGET, USERS.aditya.email, USERS.aditya.password);
+  const aman = await login(TARGET, USERS.aman.email, USERS.aman.password);
+  console.log(`Authenticated as ${aditya.email} (${aditya.userId}) and ${aman.email} (${aman.userId})`);
 
-  const findings = await runAllChecks(TARGET, alice, bob, plan);
+  const findings = await runAllChecks(TARGET, aditya, aman, plan);
   const report = buildReport({
     target: TARGET,
     findings,

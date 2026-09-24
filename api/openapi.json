@@ -175,7 +175,7 @@
             "required": true,
             "schema": { "type": "string" },
             "example": "o2",
-            "description": "Cross-user probe id for IDOR tests (Bob's order)"
+            "description": "Cross-user probe id for IDOR tests (aman's order)"
           }
         ],
         "responses": {
@@ -203,7 +203,7 @@
             "required": true,
             "schema": { "type": "string" },
             "example": "u2",
-            "description": "Cross-user probe id for IDOR tests (Bob)"
+            "description": "Cross-user probe id for IDOR tests (aman)"
           }
         ],
         "responses": {
