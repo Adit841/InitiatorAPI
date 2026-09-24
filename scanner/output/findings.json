@@ -1,6 +1,6 @@
 {
   "tool": "InitiatorAPI Scanner",
-  "scannedAt": "2026-09-24T10:38:44.705Z",
+  "scannedAt": "2026-09-24T17:49:33.084Z",
   "target": "http://localhost:4000",
   "openapi": {
     "source": "http://localhost:4000/openapi.json",
