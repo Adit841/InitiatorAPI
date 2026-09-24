@@ -1,0 +1,130 @@
+{
+  "tool": "SentinelAPI Scanner",
+  "scannedAt": "2026-09-24T09:13:52.740Z",
+  "target": "http://localhost:4000",
+  "summary": {
+    "critical": 1,
+    "high": 2,
+    "medium": 0,
+    "low": 0,
+    "info": 1,
+    "total": 4,
+    "vulnerable": 3,
+    "secure": 1
+  },
+  "findings": [
+    {
+      "id": "SEN-003",
+      "title": "Excessive data exposure on current-user profile",
+      "severity": "critical",
+      "category": "excessive_data_exposure",
+      "status": "vulnerable",
+      "endpoint": "GET /profile/me",
+      "description": "The current-user profile endpoint returns sensitive server-side fields that should never reach a client, including credential material and internal metadata.",
+      "evidence": {
+        "actor": "alice@test.com",
+        "responseStatus": 200,
+        "leakedFields": [
+          "passwordHash",
+          "internalNotes",
+          "role"
+        ],
+        "allFields": [
+          "userId",
+          "email",
+          "name",
+          "phone",
+          "passwordHash",
+          "internalNotes",
+          "role"
+        ]
+      },
+      "reproduction": [
+        "POST /auth/login as alice@test.com",
+        "GET /profile/me with Authorization: Bearer <alice-token>",
+        "Inspect JSON for unexpected fields: passwordHash, internalNotes, role"
+      ],
+      "recommendation": "Return a strict DTO with only userId, name, and email (plus any intentional public fields). Never serialize passwordHash, internalNotes, or role by default."
+    },
+    {
+      "id": "SEN-001",
+      "title": "Broken object-level authorization on orders",
+      "severity": "high",
+      "category": "idor",
+      "status": "vulnerable",
+      "endpoint": "GET /orders/:id",
+      "description": "An authenticated user can read another user's order by guessing or enumerating the order ID. The API never checks that the order belongs to the caller.",
+      "evidence": {
+        "actor": "alice@test.com",
+        "requestedOrderId": "o2",
+        "responseStatus": 200,
+        "returnedUserId": "u2",
+        "returnedFields": [
+          "orderId",
+          "userId",
+          "item",
+          "amount",
+          "address"
+        ]
+      },
+      "reproduction": [
+        "POST /auth/login with { \"email\": \"alice@test.com\", \"password\": \"<alice-password>\" }",
+        "GET /orders/o2 with Authorization: Bearer <alice-token>",
+        "Observe 200 and order owned by userId u2, not u1"
+      ],
+      "recommendation": "Before returning an order, verify order.userId === authenticated userId. Return 403 or 404 when ownership fails."
+    },
+    {
+      "id": "SEN-002",
+      "title": "Broken object-level authorization on user profiles",
+      "severity": "high",
+      "category": "idor",
+      "status": "vulnerable",
+      "endpoint": "GET /users/:id/profile",
+      "description": "Any authenticated user can fetch another user's profile by ID. There is no ownership or permission check on the :id path parameter.",
+      "evidence": {
+        "actor": "alice@test.com",
+        "requestedUserId": "u2",
+        "responseStatus": 200,
+        "returnedEmail": "bob@test.com",
+        "returnedFields": [
+          "userId",
+          "name",
+          "email",
+          "phone"
+        ]
+      },
+      "reproduction": [
+        "POST /auth/login as alice@test.com",
+        "GET /users/u2/profile with Authorization: Bearer <alice-token>",
+        "Observe 200 with another user's profile (email: bob@test.com)"
+      ],
+      "recommendation": "Allow profile access only for the authenticated user, or enforce an explicit admin/peer permission model. Reject cross-user reads with 403."
+    },
+    {
+      "id": "SEN-004",
+      "title": "Ownership check on /orders/mine (control)",
+      "severity": "info",
+      "category": "control",
+      "status": "secure",
+      "endpoint": "GET /orders/mine",
+      "description": "Control case passed. The endpoint filters by the authenticated user and returns only safe fields (orderId, item, amount). No vulnerability reported.",
+      "evidence": {
+        "actor": "alice@test.com",
+        "responseStatus": 200,
+        "orderCount": 1,
+        "sample": {
+          "orderId": "o1",
+          "item": "Laptop",
+          "amount": 899
+        }
+      },
+      "reproduction": [
+        "POST /auth/login as alice@test.com",
+        "GET /orders/mine with Authorization: Bearer <alice-token>",
+        "Confirm only the caller's orders appear, with no address/userId/password fields"
+      ],
+      "recommendation": "Keep this ownership filter as the pattern for other object endpoints."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "sentinel-scanner",
+  "version": "1.0.0",
+  "description": "Zero-Trust API vulnerability scanner (IDOR + excessive data exposure)",
+  "main": "index.js",
+  "scripts": {
+    "scan": "node index.js",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
