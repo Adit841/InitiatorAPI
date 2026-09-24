@@ -55,3 +55,15 @@ Checks:
 3. Excessive data exposure on `GET /profile/me`
 4. Control: `GET /orders/mine` should be secure (nothing flagged)
 
+## Dashboard (Dev C)
+
+```bash
+# After a scan has written scanner/output/findings.json
+cd dashboard
+npm install
+npm run sync-findings
+npm run dev
+```
+
+Opens at `http://localhost:5173`. Shows severity summary, filters, and expandable finding cards (evidence, reproduction steps, recommendations).
+
