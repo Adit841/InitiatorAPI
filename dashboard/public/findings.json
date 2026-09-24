@@ -1,6 +1,6 @@
 {
   "tool": "SentinelAPI Scanner",
-  "scannedAt": "2026-09-24T09:53:16.553Z",
+  "scannedAt": "2026-09-24T09:56:19.366Z",
   "target": "http://localhost:4000",
   "openapi": {
     "source": "http://localhost:4000/openapi.json",
