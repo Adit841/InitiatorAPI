@@ -1,6 +1,6 @@
 {
   "tool": "SentinelAPI Scanner",
-  "scannedAt": "2026-09-24T10:38:44.705Z",
+  "scannedAt": "2026-09-24T13:56:36.100Z",
   "target": "http://localhost:4000",
   "openapi": {
     "source": "http://localhost:4000/openapi.json",
@@ -9,150 +9,69 @@
     "pathCount": 8
   },
   "summary": {
-    "critical": 1,
-    "high": 2,
-    "medium": 2,
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
     "low": 0,
-    "info": 2,
+    "info": 7,
     "total": 7,
-    "vulnerable": 5,
-    "secure": 2
+    "vulnerable": 0,
+    "secure": 7
   },
   "findings": [
     {
-      "id": "SEN-003",
-      "title": "Excessive data exposure on current-user profile",
-      "severity": "critical",
-      "category": "excessive_data_exposure",
-      "status": "vulnerable",
-      "endpoint": "GET /profile/me",
-      "description": "The current-user profile endpoint returns sensitive server-side fields that should never reach a client, including credential material and internal metadata.",
-      "evidence": {
-        "actor": "aditya@test.com",
-        "responseStatus": 200,
-        "leakedFields": [
-          "passwordHash",
-          "internalNotes",
-          "role"
-        ],
-        "allFields": [
-          "userId",
-          "email",
-          "name",
-          "phone",
-          "passwordHash",
-          "internalNotes",
-          "role"
-        ]
-      },
-      "reproduction": [
-        "POST /auth/login as aditya@test.com",
-        "GET /profile/me with Authorization: Bearer <aditya-token>",
-        "Inspect JSON for unexpected fields: passwordHash, internalNotes, role"
-      ],
-      "recommendation": "Return a strict DTO with only userId, name, and email (plus any intentional public fields). Never serialize passwordHash, internalNotes, or role by default."
-    },
-    {
       "id": "SEN-001",
       "title": "Broken object-level authorization on orders",
-      "severity": "high",
+      "severity": "info",
       "category": "idor",
-      "status": "vulnerable",
+      "status": "secure",
       "endpoint": "GET /orders/:id",
-      "description": "An authenticated user can read another user's order by guessing or enumerating the order ID. The API never checks that the order belongs to the caller.",
+      "description": "Cross-user order access was denied or did not return another user's order.",
       "evidence": {
-        "actor": "aditya@test.com",
-        "requestedOrderId": "o2",
-        "responseStatus": 200,
-        "returnedUserId": "u2",
-        "returnedFields": [
-          "orderId",
-          "userId",
-          "item",
-          "amount",
-          "address"
-        ]
+        "responseStatus": 403,
+        "body": {
+          "error": "Forbidden"
+        }
       },
-      "reproduction": [
-        "POST /auth/login with { \"email\": \"aditya@test.com\", \"password\": \"<aditya-password>\" }",
-        "GET /orders/o2 with Authorization: Bearer <aditya-token>",
-        "Observe 200 and order owned by userId u2, not u1"
-      ],
-      "recommendation": "Before returning an order, verify order.userId === authenticated userId. Return 403 or 404 when ownership fails."
+      "reproduction": [],
+      "recommendation": ""
     },
     {
       "id": "SEN-002",
       "title": "Broken object-level authorization on user profiles",
-      "severity": "high",
+      "severity": "info",
       "category": "idor",
-      "status": "vulnerable",
+      "status": "secure",
       "endpoint": "GET /users/:id/profile",
-      "description": "Any authenticated user can fetch another user's profile by ID. There is no ownership or permission check on the :id path parameter.",
+      "description": "Cross-user profile access was denied.",
       "evidence": {
-        "actor": "aditya@test.com",
-        "requestedUserId": "u2",
+        "responseStatus": 403,
+        "body": {
+          "error": "Forbidden"
+        }
+      },
+      "reproduction": [],
+      "recommendation": ""
+    },
+    {
+      "id": "SEN-003",
+      "title": "Excessive data exposure on current-user profile",
+      "severity": "info",
+      "category": "excessive_data_exposure",
+      "status": "secure",
+      "endpoint": "GET /profile/me",
+      "description": "No sensitive fields were detected on /profile/me.",
+      "evidence": {
         "responseStatus": 200,
-        "returnedEmail": "aman@test.com",
-        "returnedFields": [
+        "fields": [
           "userId",
           "name",
           "email",
           "phone"
         ]
       },
-      "reproduction": [
-        "POST /auth/login as aditya@test.com",
-        "GET /users/u2/profile with Authorization: Bearer <aditya-token>",
-        "Observe 200 with another user's profile (email: aman@test.com)"
-      ],
-      "recommendation": "Allow profile access only for the authenticated user, or enforce an explicit admin/peer permission model. Reject cross-user reads with 403."
-    },
-    {
-      "id": "SEN-006",
-      "title": "JWT access tokens never expire",
-      "severity": "medium",
-      "category": "auth_misconfig",
-      "status": "vulnerable",
-      "endpoint": "POST /auth/login",
-      "description": "Issued JWTs omit the exp claim, so stolen tokens remain valid indefinitely. This weakens zero-trust session controls.",
-      "evidence": {
-        "actor": "aditya@test.com",
-        "claims": [
-          "userId",
-          "email",
-          "iat"
-        ],
-        "hasExp": false
-      },
-      "reproduction": [
-        "POST /auth/login as aditya@test.com",
-        "Decode the JWT payload (base64url middle segment)",
-        "Observe missing exp claim"
-      ],
-      "recommendation": "Sign tokens with a short exp (and optional refresh flow). Reject expired tokens in auth middleware."
-    },
-    {
-      "id": "SEN-007",
-      "title": "Missing rate limiting on authenticated endpoint",
-      "severity": "medium",
-      "category": "rate_limiting",
-      "status": "vulnerable",
-      "endpoint": "GET /orders/mine",
-      "description": "A rapid burst of authenticated requests completed without 429/503 responses or Retry-After headers, indicating no effective rate limiting.",
-      "evidence": {
-        "path": "/orders/mine",
-        "burstSize": 40,
-        "uniqueStatuses": [
-          200
-        ],
-        "successCount": 40
-      },
-      "reproduction": [
-        "POST /auth/login as aditya@test.com",
-        "Send 40 rapid GET /orders/mine requests with the same Bearer token",
-        "Observe no 429/503 and no Retry-After header"
-      ],
-      "recommendation": "Add per-IP and per-user rate limits (e.g. express-rate-limit). Return 429 with Retry-After under abuse."
+      "reproduction": [],
+      "recommendation": ""
     },
     {
       "id": "SEN-004",
@@ -212,6 +131,40 @@
         "Confirm 401/403 rather than a successful data response"
       ],
       "recommendation": "Keep auth middleware consistent across all tagged secure operations."
+    },
+    {
+      "id": "SEN-006",
+      "title": "JWT access tokens include expiry",
+      "severity": "info",
+      "category": "auth_misconfig",
+      "status": "secure",
+      "endpoint": "POST /auth/login",
+      "description": "Issued JWT includes an exp claim.",
+      "evidence": {
+        "hasExp": true,
+        "exp": 1790259095
+      },
+      "reproduction": [],
+      "recommendation": ""
+    },
+    {
+      "id": "SEN-007",
+      "title": "Rate limiting observed on authenticated endpoint",
+      "severity": "info",
+      "category": "rate_limiting",
+      "status": "secure",
+      "endpoint": "GET /orders/mine",
+      "description": "Burst traffic received throttling signals (429/503 or Retry-After).",
+      "evidence": {
+        "limited": 34,
+        "sawRetryAfter": true,
+        "uniqueStatuses": [
+          200,
+          429
+        ]
+      },
+      "reproduction": [],
+      "recommendation": ""
     }
   ]
 }

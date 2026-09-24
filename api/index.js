@@ -19,6 +19,31 @@ app.get("/openapi.json", (req, res) => {
 });
 
 const SECRET = "hackathon-secret-key";
+const TOKEN_TTL = "15m";
+
+// Simple in-memory rate limit (per IP) — enough for the demo secure branch
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX = 20;
+const rateBuckets = new Map();
+
+function rateLimit(req, res, next) {
+  const key = req.ip || req.socket.remoteAddress || "unknown";
+  const now = Date.now();
+  let bucket = rateBuckets.get(key);
+  if (!bucket || now - bucket.start >= RATE_WINDOW_MS) {
+    bucket = { start: now, count: 0 };
+    rateBuckets.set(key, bucket);
+  }
+  bucket.count += 1;
+  if (bucket.count > RATE_MAX) {
+    const retryAfter = Math.ceil((RATE_WINDOW_MS - (now - bucket.start)) / 1000);
+    res.set("Retry-After", String(retryAfter));
+    return res.status(429).json({ error: "Too many requests" });
+  }
+  next();
+}
+
+app.use(rateLimit);
 
 // ---- Auth middleware ----
 function auth(req, res, next) {
@@ -42,6 +67,19 @@ function credentials(req) {
   };
 }
 
+function signToken(userId, email) {
+  return jwt.sign({ userId, email }, SECRET, { expiresIn: TOKEN_TTL });
+}
+
+function publicProfile(user) {
+  return {
+    userId: user.userId,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+  };
+}
+
 // ---- Auth routes ----
 app.post("/auth/register", (req, res) => {
   const { email, password, name } = credentials(req);
@@ -56,7 +94,7 @@ app.post("/auth/register", (req, res) => {
     userId, email, name, phone: "0000000000",
     passwordHash: bcrypt.hashSync(password, 8), internalNotes: "", role: "user",
   });
-  const token = jwt.sign({ userId, email }, SECRET);
+  const token = signToken(userId, email);
   res.status(201).json({ userId, token });
 });
 
@@ -69,9 +107,10 @@ app.post("/auth/login", (req, res) => {
   if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
     return res.status(401).json({ error: "Invalid credentials" });
   }
-  const token = jwt.sign({ userId: user.userId, email }, SECRET);
+  const token = signToken(user.userId, user.email);
   res.json({ userId: user.userId, token });
 });
+
 // Registered before /orders/:id so "mine" is not captured as an order id.
 app.get("/orders/mine", auth, (req, res) => {
   const mine = orders
@@ -83,19 +122,28 @@ app.get("/orders/mine", auth, (req, res) => {
 app.get("/orders/:id", auth, (req, res) => {
   const order = orders.find(o => o.orderId === req.params.id);
   if (!order) return res.status(404).json({ error: "Not found" });
-  res.json(order); // BUG: never checks order.userId === req.user.userId
+  // FIX: block cross-user order reads (IDOR)
+  if (order.userId !== req.user.userId) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  res.json(order);
 });
 
 app.get("/users/:id/profile", auth, (req, res) => {
   const user = users.find(u => u.userId === req.params.id);
   if (!user) return res.status(404).json({ error: "Not found" });
-  res.json({ userId: user.userId, name: user.name, email: user.email, phone: user.phone });
+  // FIX: only allow reading your own profile
+  if (user.userId !== req.user.userId) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  res.json(publicProfile(user));
 });
 
 app.get("/profile/me", auth, (req, res) => {
   const user = users.find(u => u.userId === req.user.userId);
   if (!user) return res.status(404).json({ error: "Not found" });
-  res.json(user); // BUG: leaks passwordHash, internalNotes, role
+  // FIX: return a safe DTO — never passwordHash / internalNotes / role
+  res.json(publicProfile(user));
 });
 
 app.use((req, res) => {
@@ -110,4 +158,4 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Server error" });
 });
 
-app.listen(4000, () => console.log("API running on http://localhost:4000"));
+app.listen(4000, () => console.log("API running on http://localhost:4000 (secure branch)"));
