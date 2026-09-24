@@ -1,0 +1,13 @@
+{
+  "name": "sentinelapi",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Zero-Trust API Vulnerability Scanner — sandboxed demo API, scanner, and findings dashboard",
+  "scripts": {
+    "install:all": "npm --prefix api install && npm --prefix scanner install && npm --prefix dashboard install",
+    "api": "npm --prefix api run dev",
+    "scan": "npm --prefix scanner run scan && npm --prefix dashboard run sync-findings",
+    "dashboard": "npm --prefix dashboard run dev",
+    "build:dashboard": "npm --prefix dashboard run build"
+  }
+}

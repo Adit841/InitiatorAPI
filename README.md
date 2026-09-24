@@ -1,69 +1,63 @@
 # SentinelAPI
 
-Zero-Trust API Vulnerability Scanner — built for [hackathon name].
+Zero-Trust API Vulnerability Scanner — hackathon MVP.
+
+> *"Find the API vulnerability before the breach headline does."*
+
+Scans a **sandboxed** demo API (never production without authorization) for high-impact authz and data-exposure issues, then shows severity-ranked findings with reproduction steps.
 
 ## Structure
-- /api        → vulnerable demo API (Dev A)
-- /scanner    → vulnerability scanner engine (Dev B)
-- /dashboard  → findings report dashboard (Dev C)
 
-## Team
-- Dev A: API
-- Dev B: Scanner
-- Dev C: Dashboard
-- PPT/Docs: [name]
+| Path | Role |
+|---|---|
+| `/api` | Intentionally vulnerable demo API + OpenAPI spec |
+| `/scanner` | OpenAPI-driven vulnerability scanner |
+| `/dashboard` | Findings report UI (Vite + React) |
 
-## Demo API (Dev A)
+## Quick start (3 terminals)
 
 ```bash
-cd api
-npm install
-npm run dev
+npm run install:all
+
+# Terminal 1
+npm run api
+
+# Terminal 2
+npm run scan
+
+# Terminal 3
+npm run dashboard
 ```
 
-Runs at `http://localhost:4000`. `GET /health` returns `{ "ok": true }`.
+- API: http://localhost:4000 (`GET /health`, `GET /openapi.json`)
+- Dashboard: http://localhost:5173
 
-Seeded accounts (password `test1234` for both):
+See [DEMO.md](./DEMO.md) for the judge walkthrough.
+
+## Seeded accounts
+
+Password for both: `test1234`
 
 | Email | userId | Order |
 |---|---|---|
 | alice@test.com | u1 | o1 Laptop, 899 |
 | bob@test.com | u2 | o2 Phone, 499 |
 
-Protected routes need `Authorization: Bearer <token>` from `POST /auth/login` or `POST /auth/register`. Both return `{ userId, token }`.
+## What the scanner checks
 
-| Route | Expected behavior |
-|---|---|
-| `GET /orders/:id` | Vulnerable. Any logged-in user can read any order, including `address`. |
-| `GET /users/:id/profile` | Vulnerable. Any logged-in user can read any profile (`userId`, `name`, `email`, `phone`). |
-| `GET /profile/me` | Vulnerable. Own profile, but also returns `passwordHash`, `internalNotes`, and `role`. |
-| `GET /orders/mine` | Control. Only the caller's orders, and only `orderId`, `item`, `amount`. |
+1. **OpenAPI ingest** — loads `/openapi.json` (or `OPENAPI_PATH` / `OPENAPI_URL`)
+2. **IDOR / BOLA** — Alice → Bob's `GET /orders/{id}` and `GET /users/{id}/profile`
+3. **Excessive data exposure** — `GET /profile/me` sensitive fields
+4. **Auth misconfiguration** — unauthenticated probes + JWT missing `exp`
+5. **Rate limiting** — burst traffic without 429/Retry-After
+6. **Control** — `GET /orders/mine` should remain secure
 
-## Scanner (Dev B)
+Findings are written to `scanner/output/findings.json` and synced into the dashboard via `npm run scan`.
 
-```bash
-# API must already be running on :4000
-cd scanner
-npm run scan
-```
+## CI
 
-Writes ranked findings to `scanner/output/findings.json` for the dashboard.
+GitHub Actions (`.github/workflows/ci.yml`) starts the demo API, runs the scanner, uploads `findings.json`, and builds the dashboard on push/PR to `main`.
 
-Checks:
-1. IDOR on `GET /orders/:id` (Alice → Bob's `o2`)
-2. IDOR on `GET /users/:id/profile` (Alice → Bob's `u2`)
-3. Excessive data exposure on `GET /profile/me`
-4. Control: `GET /orders/mine` should be secure (nothing flagged)
+## Ethics / scope
 
-## Dashboard (Dev C)
-
-```bash
-# After a scan has written scanner/output/findings.json
-cd dashboard
-npm install
-npm run sync-findings
-npm run dev
-```
-
-Opens at `http://localhost:5173`. Shows severity summary, filters, and expandable finding cards (evidence, reproduction steps, recommendations).
-
+Only test against this sandboxed demo API or other APIs you are **explicitly authorized** to assess. Do not point SentinelAPI at third-party production systems.

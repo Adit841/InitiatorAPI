@@ -1,0 +1,60 @@
+name: SentinelAPI CI
+
+on:
+  push:
+    branches: [main, hackathon-ready]
+  pull_request:
+    branches: [main]
+
+jobs:
+  scan-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install packages
+        run: |
+          npm --prefix api install
+          npm --prefix scanner install
+          npm --prefix dashboard install
+
+      - name: Start demo API
+        run: |
+          npm --prefix api run dev &
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:4000/health >/dev/null; then
+              echo "API ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "API failed to start"
+          exit 1
+
+      - name: Verify OpenAPI
+        run: curl -sf http://127.0.0.1:4000/openapi.json | head -c 200
+
+      - name: Run scanner
+        run: npm --prefix scanner run scan
+        env:
+          TARGET_URL: http://127.0.0.1:4000
+
+      - name: Sync findings to dashboard
+        run: npm --prefix dashboard run sync-findings
+
+      - name: Upload findings
+        uses: actions/upload-artifact@v4
+        with:
+          name: findings
+          path: scanner/output/findings.json
+
+      - name: Build dashboard
+        run: npm --prefix dashboard run build

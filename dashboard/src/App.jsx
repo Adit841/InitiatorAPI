@@ -153,6 +153,13 @@ export default function App() {
           <h1>Vulnerability findings</h1>
           <p className="sub">
             Scan of <code>{report.target}</code> · {formatTime(report.scannedAt)}
+            {report.openapi?.title ? (
+              <>
+                {" "}
+                · OpenAPI <code>{report.openapi.title}</code>
+                {report.openapi.pathCount != null ? ` (${report.openapi.pathCount} paths)` : ""}
+              </>
+            ) : null}
           </p>
         </div>
         <div className="score">

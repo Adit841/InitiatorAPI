@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
@@ -10,6 +11,11 @@ app.use(express.json());
 
 app.get("/health", (req, res) => {
   res.json({ ok: true });
+});
+
+// OpenAPI contract for the scanner (capability: ingest API definition)
+app.get("/openapi.json", (req, res) => {
+  res.sendFile(path.join(__dirname, "openapi.json"));
 });
 
 const SECRET = "hackathon-secret-key";

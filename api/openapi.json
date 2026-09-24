@@ -1,0 +1,235 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "SentinelAPI Demo Store",
+    "description": "Intentionally vulnerable sandboxed API for SentinelAPI scanner demos. Do not point the scanner at production systems.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000",
+      "description": "Local demo"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Health": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "userId": { "type": "string" },
+          "token": { "type": "string" }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "orderId": { "type": "string" },
+          "userId": { "type": "string" },
+          "item": { "type": "string" },
+          "amount": { "type": "number" },
+          "address": { "type": "string" }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "userId": { "type": "string" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "phone": { "type": "string" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Liveness check",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Health" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "operationId": "openapi",
+        "summary": "OpenAPI specification",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "OpenAPI document"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "register",
+        "summary": "Register a user",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password", "name"],
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" },
+                  "name": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "login",
+        "summary": "Login",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/mine": {
+      "get": {
+        "operationId": "ordersMine",
+        "summary": "List caller's orders (ownership-filtered control)",
+        "tags": ["orders", "control"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Caller-owned orders only"
+          }
+        }
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "operationId": "getOrderById",
+        "summary": "Get order by id",
+        "tags": ["orders", "idor"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "o2",
+            "description": "Cross-user probe id for IDOR tests (Bob's order)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Order" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}/profile": {
+      "get": {
+        "operationId": "getUserProfile",
+        "summary": "Get user profile by id",
+        "tags": ["users", "idor"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "u2",
+            "description": "Cross-user probe id for IDOR tests (Bob)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Profile" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile/me": {
+      "get": {
+        "operationId": "profileMe",
+        "summary": "Current user profile",
+        "tags": ["users", "excessive_data_exposure"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Current user (may over-expose fields)"
+          }
+        }
+      }
+    }
+  }
+}

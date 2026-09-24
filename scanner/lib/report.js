@@ -20,12 +20,13 @@ function sortFindings(findings) {
   });
 }
 
-function buildReport({ target, findings }) {
+function buildReport({ target, findings, openapi }) {
   const sorted = sortFindings(findings);
   return {
     tool: "SentinelAPI Scanner",
     scannedAt: new Date().toISOString(),
     target,
+    openapi: openapi || null,
     summary: summarize(sorted),
     findings: sorted,
   };
