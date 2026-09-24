@@ -39,3 +39,19 @@ Protected routes need `Authorization: Bearer <token>` from `POST /auth/login` or
 | `GET /profile/me` | Vulnerable. Own profile, but also returns `passwordHash`, `internalNotes`, and `role`. |
 | `GET /orders/mine` | Control. Only the caller's orders, and only `orderId`, `item`, `amount`. |
 
+## Scanner (Dev B)
+
+```bash
+# API must already be running on :4000
+cd scanner
+npm run scan
+```
+
+Writes ranked findings to `scanner/output/findings.json` for the dashboard.
+
+Checks:
+1. IDOR on `GET /orders/:id` (Alice → Bob's `o2`)
+2. IDOR on `GET /users/:id/profile` (Alice → Bob's `u2`)
+3. Excessive data exposure on `GET /profile/me`
+4. Control: `GET /orders/mine` should be secure (nothing flagged)
+
