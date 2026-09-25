@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-labelledby="title desc">
+  <title id="title">InitiatorAPI System Architecture</title>
+  <desc id="desc">Engineer triggers Demo API, Scanner, and Dashboard. Scanner reads OpenAPI from the API, writes findings.json, which syncs to the Dashboard. GitHub Actions runs the same pipeline.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="540" fill="#f8fafc"/>
+
+  <text x="40" y="42" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">InitiatorAPI - System Architecture</text>
+  <text x="40" y="64" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#64748b">OpenAPI-driven scanner | sandboxed demo API | findings dashboard | CI parity</text>
+
+  <rect x="200" y="90" width="520" height="340" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="220" y="114" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#64748b">LOCAL / DEMO ENVIRONMENT</text>
+
+  <rect x="40" y="220" width="130" height="70" rx="10" fill="#e2e8f0" stroke="#64748b" stroke-width="1.5"/>
+  <text x="105" y="250" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#0f172a">Engineer</text>
+  <text x="105" y="270" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#475569">/ Judge</text>
+
+  <rect x="240" y="150" width="180" height="90" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="330" y="180" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#0f172a">Demo API</text>
+  <text x="330" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#475569">Express - :4000</text>
+  <text x="330" y="218" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#475569">OpenAPI + intentional vulns</text>
+
+  <rect x="500" y="150" width="180" height="90" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+  <text x="590" y="180" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#0f172a">Scanner</text>
+  <text x="590" y="200" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#475569">Node CLI</text>
+  <text x="590" y="218" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#475569">OpenAPI to checks</text>
+
+  <ellipse cx="590" cy="310" rx="95" ry="42" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+  <text x="590" y="306" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#0f172a">findings.json</text>
+  <text x="590" y="324" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#475569">ranked report</text>
+
+  <rect x="240" y="340" width="180" height="70" rx="10" fill="#faf5ff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="330" y="368" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#0f172a">Dashboard</text>
+  <text x="330" y="388" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#475569">Vite + React - :5173</text>
+
+  <rect x="760" y="150" width="160" height="220" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="840" y="174" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#64748b">CI</text>
+  <rect x="780" y="200" width="120" height="100" rx="10" fill="#f1f5f9" stroke="#475569" stroke-width="2"/>
+  <text x="840" y="235" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#0f172a">GitHub</text>
+  <text x="840" y="255" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#0f172a">Actions</text>
+  <text x="840" y="278" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#475569">same pipeline</text>
+
+  <line x1="170" y1="240" x2="236" y2="200" stroke="#334155" stroke-width="1.75" marker-end="url(#arrow)"/>
+  <text x="175" y="205" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="500" fill="#334155">start</text>
+
+  <line x1="170" y1="255" x2="496" y2="200" stroke="#334155" stroke-width="1.75" marker-end="url(#arrow)"/>
+  <text x="280" y="248" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="500" fill="#334155">npm run scan</text>
+
+  <line x1="170" y1="275" x2="236" y2="360" stroke="#334155" stroke-width="1.75" marker-end="url(#arrow)"/>
+  <text x="155" y="340" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="500" fill="#334155">triage</text>
+
+  <line x1="420" y1="185" x2="496" y2="185" stroke="#334155" stroke-width="1.75" marker-end="url(#arrow)"/>
+  <text x="458" y="172" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="500" fill="#334155">OpenAPI + probes</text>
+
+  <line x1="590" y1="240" x2="590" y2="266" stroke="#334155" stroke-width="1.75" marker-end="url(#arrow)"/>
+  <text x="605" y="258" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="500" fill="#334155">write</text>
+
+  <line x1="500" y1="320" x2="424" y2="360" stroke="#334155" stroke-width="1.75" marker-end="url(#arrow)"/>
+  <text x="430" y="325" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="500" fill="#334155">sync</text>
+
+  <line x1="760" y1="230" x2="684" y2="210" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <line x1="760" y1="280" x2="688" y2="300" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+  <text x="700" y="265" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="500" fill="#334155">CI</text>
+
+  <text x="40" y="510" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#64748b">Scope: sandboxed / authorized APIs only. Never scan production without authorization.</text>
+</svg>

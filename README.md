@@ -32,7 +32,7 @@ npm run dashboard
 - API: http://localhost:4000 (`GET /health`, `GET /openapi.json`)
 - Dashboard: http://localhost:5173
 
-See [DEMO.md](./DEMO.md) for the judge walkthrough.
+See [DEMO.md](./DEMO.md) for the 7-minute judge walkthrough, [ARCHITECTURE.md](./ARCHITECTURE.md) / [docs/architecture.png](./docs/architecture.png) for the system diagram, and [TEAM.md](./TEAM.md) for contribution details.
 
 ## Seeded accounts
 
